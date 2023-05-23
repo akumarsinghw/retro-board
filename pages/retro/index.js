@@ -87,7 +87,7 @@ function Retro() {
               <ul>
               {activeSprintData.comments[item.key].map(comment => {
                 // TODO: Add better UI component.
-                return <li>comment</li>;
+                return <li>{comment}</li>;
               }) }
               </ul>
               : noComments}
@@ -181,7 +181,7 @@ function Retro() {
       </Box>
       
       <Box>
-        {isAdmin && <MButton variant="contained" onClick={()=>{endSession()}}>End Session</MButton>}
+        {isAdmin && <MButton variant="contained" onClick={endSession}>End Session</MButton>}
         <MButton variant="contained" onClick={()=>{refreshSprintData()}}>Refresh</MButton>
       </Box>
 
