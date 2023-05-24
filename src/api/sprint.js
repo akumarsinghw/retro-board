@@ -52,6 +52,7 @@ export const POST_CREATE_SPRINT = async ({id, payload = {}}) => {
 export const POST_END_SPRINT = async ({id, payload = {}}) => {
     const currentSprintResponse = await fetch(`http://localhost:3000/sprint/end/${id}`, {
         ...DEFAULT_POST,
+        method: 'PUT',
         body: JSON.stringify(payload)
     });
     const temp = await currentSprintResponse.json();

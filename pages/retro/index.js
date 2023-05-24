@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import {default as MButton} from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
+import {RetroTable, RetroListView} from '/src/components';
 import {GET_SPRINT_TYPE, GET_ACTIVE_SPRINT, POST_COMMENT, POST_CREATE_SPRINT, POST_END_SPRINT} from '/src/api';
 
 
@@ -20,8 +21,17 @@ function Retro() {
   const [activeSprintData, setActiveSprintData] = React.useState({});
   
   const [sprintTypes, setSprintTypes] = React.useState();
-  // let sprintTypes = React.useRef().current;
+  let intervalRef = React.useRef().current;
 
+
+
+  const refreshSprintData = () => {
+    (async ()=>{
+    const sprintData = await GET_ACTIVE_SPRINT();
+    setSprintName(sprintData.sprint_id);
+    setActiveSprintData(sprintData);
+    })()
+  }
 
   // Effect to get all init data
   React.useEffect(()=>{
@@ -31,24 +41,24 @@ function Retro() {
         setSprintTypes(sprintTypes);
         
       }
+      refreshSprintData();
 
-      const sprintData = await GET_ACTIVE_SPRINT();
-      setSprintName(sprintData.sprint_id);
-      setActiveSprintData(sprintData);
+      if(!intervalRef) {
+        intervalRef = setInterval(()=>{
+          refreshSprintData();
+        }, 5000)
+      }
+      
     })()
+    return () => {
+      clearInterval(intervalRef);
+    }
   }, [])
 
   
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
 
-  const refreshSprintData = () => {
-    (async ()=>{
-    const sprintData = await GET_ACTIVE_SPRINT();
-    setSprintName(sprintData.sprint_id);
-    setActiveSprintData(sprintData);
-    })()
-  }
   const createSession = () => {
     POST_CREATE_SPRINT({payload: {id: sprintName}})
   }
@@ -58,7 +68,10 @@ function Retro() {
 
   const submitComment = () => {
     const payload =  {key: commentBoxType, comment: comment}
-    POST_COMMENT({id: activeSprintData.sprint_id, payload})
+    POST_COMMENT({id: activeSprintData.sprint_id, payload});
+    setComment();
+    handleModalClose();
+    refreshSprintData();
   }
   const updateCommentBoxType = (t) => {
     setCommentBoxType(t)
@@ -69,36 +82,13 @@ function Retro() {
     const noComments = <Typography sx={{fontStyle: 'italic', fontSize: 14, pl: 3, mb: 4}}>
       No Comments
     </Typography>
-
-    return sprintTypes.map(item => {
-      return (
-        <Box sx={{mb: 4, borderWidth: 0, borderBottomWidth: 2, borderStyle: 'solid'}}>
-          <Box
-            sx={{display: 'flex', direction: 'row', justifyContent: "space-between" , alignItems: "center"
-            }}
-          >
-            <Typography>{item.name}</Typography>
-            <MButton variant="outlined" onClick={() => {
-              updateCommentBoxType(item.key)
-              handleModalOpen();
-              }}>Add</MButton>
-          </Box>
-            {activeSprintData?.comments && activeSprintData.comments[item.key].length ? 
-              <ul>
-              {activeSprintData.comments[item.key].map(comment => {
-                // TODO: Add better UI component.
-                return <li>{comment}</li>;
-              }) }
-              </ul>
-              : noComments}
-        </Box>
-
-      )
-    })
+    return <RetroTable handleModalOpen={handleModalOpen} updateCommentBoxType={updateCommentBoxType} noComments={noComments} sprintTypes={sprintTypes} activeSprintData={activeSprintData} />
+    // Below code is for List View
+    return <RetroListView handleModalOpen={handleModalOpen} updateCommentBoxType={updateCommentBoxType} noComments={noComments} sprintTypes={sprintTypes} activeSprintData={activeSprintData} />
   }
   const textAreaTemplate = () => {
     let label = "";
-    sprintTypes.map(item => {
+    sprintTypes?.map(item => {
       if(item.key === commentBoxType) {
         label=  item.name
       }
@@ -152,7 +142,7 @@ function Retro() {
     </Modal>)
   }
 
-  if(!activeSprintData.sprint_id) {
+  const noActiveSprintTemplate = () => {
     return <Container maxWidth="sm">
       <Typography>
         No Active Sprint. Wait for Admin to Start the Session.
@@ -161,7 +151,7 @@ function Retro() {
   }
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="lg">
       <Box sx={{ my: 4, display: 'flex', direction: 'row', justifyContent: "space-between", alignItems: 'center' }}>
         <Box  sx={{  display: 'flex', direction: 'row', justifyContent: "space-between" }}>
 
@@ -187,12 +177,8 @@ function Retro() {
 
       </Box>
       <Box>
-        {accordionTemplate()}
-        {
-          commentBoxType &&
-          textAreaTemplate()
-        }
-
+        { activeSprintData.sprint_id ? accordionTemplate() : noActiveSprintTemplate()}
+        {textAreaTemplate()}
       </Box>
     </Container>
   );
