@@ -19,15 +19,23 @@ export default function Index() {
   const users = [
     {
       name: "Venkat",
-      email: "venkat@wayfair.com"
+      email: "vgaddameedi@wayfair.com"
     },
     {
       name: "Abhishek",
-      email: "Abhishek@wayfair.com"
+      email: "akumarsingh@wayfair.com"
     },
     {
       name: "Rehman",
-      email: "Rehman@wayfair.com"
+      email: "mrehmanbaig@wayfair.com"
+    },
+    {
+      name: "Pasha",
+      email: "smohsinpasha@wayfair.com"
+    },
+    {
+      name: "Shubham",
+      email: "schoudhary7@wayfair.com"
     }
   ];
 
@@ -50,16 +58,18 @@ export default function Index() {
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Team Retrospective
-        </Typography>
+        </Typography> 
         <Autocomplete
           value={value}
           fullWidth
           onChange={(event, newValue) => {
             setValue(newValue);
+            localStorage.setItem("user",JSON.stringify(newValue))
           }}
           inputValue={inputValue}
           onInputChange={(event, newInputValue) => {
             setInputValue(newInputValue);
+            localStorage.setItem("user",JSON.stringify(value))
           }}
           getOptionLabel={(option) => option.name}
           isOptionEqualToValue={(option) => option.name}
