@@ -33,7 +33,6 @@ export const RetroTable = ({sprintTypes, activeSprintData, noComments, updateCom
           {return activeSprintData?.comments && activeSprintData.comments[item.key].length ? 
             <TableCell>
                 {activeSprintData.comments[item.key].map(comment => {
-                  console.log("kfjdsalkf: ", comment)
                   // TODO: Add better UI component.
                   return <Typography>{'- ' + comment}</Typography>;
                 }) }

@@ -17,6 +17,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { ADMIN_USERNAME } from "/src/constants";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -46,7 +47,7 @@ const index = () => {
   const [user, setUser] = useState();
   const [selected, setSelected] = useState();
   const [showTable, setTable] = useState(false);
-  const isAdminValue = "Venkat";
+  const isAdminValue = ADMIN_USERNAME;
 
   var ratings = [
     {

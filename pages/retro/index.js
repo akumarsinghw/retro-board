@@ -8,12 +8,12 @@ import {default as MButton} from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import {RetroTable, RetroListView} from '/src/components';
 import {GET_SPRINT_TYPE, GET_ACTIVE_SPRINT, POST_COMMENT, POST_CREATE_SPRINT, POST_END_SPRINT} from '/src/api';
-
+import { ADMIN_USERNAME } from "/src/constants";
 
 
 
 function Retro() {
-  const [isAdmin, setIsAdmin] = React.useState(true);
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [commentBoxType, setCommentBoxType] = React.useState(null);
   const [sprintName, setSprintName] = React.useState("SPRINT_123");
@@ -34,6 +34,14 @@ function Retro() {
   }
 
   // Effect to get all init data
+  React.useEffect(()=>{
+    const logedInUser = JSON.parse(localStorage.getItem("user"));
+    console.log("logedInUser: ",logedInUser)
+    // Only checking for username
+    if(logedInUser.name === ADMIN_USERNAME) {
+      setIsAdmin(true);
+    }
+  }, [])
   React.useEffect(()=>{
     (async ()=>{
       if(!sprintTypes) {

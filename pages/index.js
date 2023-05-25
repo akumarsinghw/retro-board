@@ -13,13 +13,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { ADMIN_USERNAME, ADMIN_MAIL, ADMIN_PASSWORD } from "/src/constants";
 
 export default function Index() {
 
   const users = [
     {
-      name: "Venkat",
-      email: "vgaddameedi@wayfair.com"
+      name: ADMIN_USERNAME,
+      email: ADMIN_MAIL,
     },
     {
       name: "Abhishek",
@@ -41,7 +42,7 @@ export default function Index() {
 
   const [value, setValue] = useState(users[0]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const isAdminValue = "Venkat"
+  const isAdminValue = ADMIN_USERNAME;
   const [inputValue, setInputValue] = useState('');
   const [password, setPassword] = useState("");
   const [newUsers, setNewUsers] = useState(users);
@@ -103,7 +104,7 @@ export default function Index() {
               }}
               onKeyPress={(event) => {
                 if (event.key === 'Enter') {
-                  if (password == "qwerty@123") {
+                  if (password == ADMIN_PASSWORD) {
                     setIsAdmin(true)
                   }
                   else {
