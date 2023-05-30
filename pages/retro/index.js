@@ -18,25 +18,52 @@ function Retro() {
   const [commentBoxType, setCommentBoxType] = React.useState(null);
   const [sprintName, setSprintName] = React.useState("SPRINT_123");
   const [comment, setComment] = React.useState("");
-  const [activeSprintData, setActiveSprintData] = React.useState({});
-  
+  const [activeSprintData, setActiveSprintData] = React.useState(null);
+
   const [sprintTypes, setSprintTypes] = React.useState();
-  let intervalRef = React.useRef().current;
+  let intervalRef = React.useRef();
 
 
 
-  const refreshSprintData = () => {
+  const refreshSprintData = async () => {
     (async ()=>{
     const sprintData = await GET_ACTIVE_SPRINT();
-    setSprintName(sprintData.sprint_id);
+    if(!sprintData.comments.isSessionEnded) {
+      setSprintName(sprintData.sprint_id);
+    }
     setActiveSprintData(sprintData);
     })()
+  }
+  const startIntervalForSprint = () => {
+    (async ()=>{
+      const sprintData = await GET_ACTIVE_SPRINT();
+      setSprintName(sprintData.sprint_id);
+      setActiveSprintData(sprintData);
+      if(sprintData.comments.isSessionEnded === false) {
+        if(!intervalRef.current) {
+          intervalRef.current = setInterval(()=>{
+            refreshSprintData();
+          }, 5000);
+        }
+      }
+    })()
+
+
+    if(activeSprintData?.comments?.isSessionEnded === true) {
+      refreshSprintData();
+    } else if(activeSprintData?.comments?.isSessionEnded === false) {
+      if(!intervalRef.current) {
+        refreshSprintData();
+        intervalRef.current = setInterval(()=>{
+          refreshSprintData();
+        }, 5000);
+      }
+    }
   }
 
   // Effect to get all init data
   React.useEffect(()=>{
     const logedInUser = JSON.parse(localStorage.getItem("user"));
-    console.log("logedInUser: ",logedInUser)
     // Only checking for username
     if(logedInUser.name === ADMIN_USERNAME) {
       setIsAdmin(true);
@@ -47,31 +74,26 @@ function Retro() {
       if(!sprintTypes) {
         const sprintTypes = await GET_SPRINT_TYPE();
         setSprintTypes(sprintTypes);
-        
       }
-      refreshSprintData();
-
-      if(!intervalRef) {
-        intervalRef = setInterval(()=>{
-          refreshSprintData();
-        }, 5000)
-      }
-      
+      startIntervalForSprint();
     })()
     return () => {
-      clearInterval(intervalRef);
+      clearInterval(intervalRef.current);
     }
   }, [])
 
-  
+
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
 
   const createSession = () => {
-    POST_CREATE_SPRINT({payload: {id: sprintName}})
+    POST_CREATE_SPRINT({payload: {id: sprintName}});
+    startIntervalForSprint();
   }
   const endSession = () => {
-    POST_END_SPRINT({id: activeSprintData.sprint_id})
+    POST_END_SPRINT({id: activeSprintData.sprint_id});
+    clearInterval(intervalRef.current)
+
   }
 
   const submitComment = () => {
@@ -119,7 +141,7 @@ function Retro() {
     open={isModalOpen}
     onClose={handleModalClose}
   >
-    
+
     <Box sx={style}>
       <TextField
           id={commentBoxType}
@@ -135,7 +157,7 @@ function Retro() {
           width: '100%'
         }}
         />
-        <Box 
+        <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -143,8 +165,8 @@ function Retro() {
             pt: 2
           }}
         >
-          <MButton variant="outlined" onClick={handleModalClose}>Cancel</MButton> 
-          <MButton variant="contained" onClick={submitComment}>Submit</MButton> 
+          <MButton variant="outlined" onClick={handleModalClose}>Cancel</MButton>
+          <MButton variant="contained" onClick={submitComment}>Submit</MButton>
         </Box>
       </Box>
     </Modal>)
@@ -177,15 +199,15 @@ function Retro() {
         />
       {isAdmin && <MButton variant="contained" onClick={()=>{createSession()}}>Create</MButton>}
       </Box>
-      
+
       <Box>
-        {isAdmin && <MButton variant="contained" onClick={endSession}>End Session</MButton>}
+        {isAdmin && <MButton variant="contained" onClick={endSession} disabled={activeSprintData?.comments?.isSessionEnded}>End Session</MButton>}
         <MButton variant="contained" onClick={()=>{refreshSprintData()}}>Refresh</MButton>
       </Box>
 
       </Box>
       <Box>
-        { activeSprintData.sprint_id ? accordionTemplate() : noActiveSprintTemplate()}
+        { activeSprintData?.sprint_id ? accordionTemplate() : noActiveSprintTemplate()}
         {textAreaTemplate()}
       </Box>
     </Container>

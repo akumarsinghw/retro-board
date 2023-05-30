@@ -19,22 +19,25 @@ export const RetroTable = ({sprintTypes, activeSprintData, noComments, updateCom
         {sprintTypes.map(item => <TableCell>
           <Box  sx={{display: 'flex', justifyContent: 'space-between'}}>
           <Typography>{item.name}</Typography>
-            <MButton variant="outlined" onClick={() => {
+            <MButton variant="outlined"
+              onClick={() => {
               updateCommentBoxType(item.key)
               handleModalOpen();
-              }}>Add</MButton>
+              }}
+              disabled={activeSprintData?.comments.isSessionEnded}
+              >+</MButton>
           </Box>
           </TableCell>)}
       </TableRow>
       </TableHead>
       <TableBody>
-        <TableRow>
-        {sprintTypes.map(item => 
-          {return activeSprintData?.comments && activeSprintData.comments[item.key].length ? 
+        <TableRow sx={{minHeight: "400px"}}>
+        {sprintTypes.map(item =>
+          {return activeSprintData?.comments && activeSprintData.comments[item.key].length ?
             <TableCell>
                 {activeSprintData.comments[item.key].map(comment => {
                   // TODO: Add better UI component.
-                  return <Typography>{'- ' + comment}</Typography>;
+                  return <Box sx={{padding: 1, border: "1px solid 00000073", borderRadius: 2, background: "#fff", mb: 1, boxShadow: "1px 1px 6px 0px #00000073"}}>{comment}</Box>;
                 }) }
             </TableCell>
             :  <TableCell>{noComments}</TableCell>
